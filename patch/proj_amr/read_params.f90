@@ -59,7 +59,8 @@ subroutine read_params
        & ,npartmax,nparttot,nexpand,boxlen,nlevel_collapse &
        & ,holdback,dr_refine_pkpc !GILEE
   namelist/poisson_params/epsilon,gravity_type,gravity_params &
-       & ,cg_levelmin,cic_levelmax
+       & ,cg_levelmin,cic_levelmax &
+       & ,smooth_gravity,dr_smooth !GILEE
   namelist/lightcone_params/thetay_cone,thetaz_cone,zmax_cone
   namelist/movie_params/levelmax_frame,nw_frame,nh_frame,ivar_frame &
        & ,xcentre_frame,ycentre_frame,zcentre_frame &
