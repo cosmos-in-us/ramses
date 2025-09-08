@@ -1,9 +1,11 @@
+bin/run
 *.o
 *.i
 *.mod
 ramses1d
 ramses2d
 ramses3d
+ramses3d*
 .DS_Store
 amr2cylprof
 amr2map
