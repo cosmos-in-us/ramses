@@ -29,6 +29,7 @@ recursive subroutine amr_step(ilevel,icount)
   integer::i,idim,ivar
   logical::ok_defrag,output_now_all
   logical,save::first_step=.true.
+  logical::output_now2=.false. !GILEE
 
   if(numbtot(1,ilevel)==0)return
 
@@ -162,7 +163,14 @@ recursive subroutine amr_step(ilevel,icount)
         if(clumpfind .and. ndim==3) call clump_finder(.true.,.false.)
 #endif
 
+!GILEE
+!        if(smooth_gravity)then
+!          call dump_density_fields(nstep_coarse)
+!        end if
+!GILEE
+  
         call dump_all
+        output_now2=.true. !GILEE
 
         if (output_now_all.EQV..true.) then
           output_now=.false.
@@ -371,6 +379,13 @@ recursive subroutine amr_step(ilevel,icount)
 #endif
   end if
 
+!GILEE
+  if(smooth_gravity .and. output_now2)then
+    call dump_density_fields(nstep_coarse)
+    output_now2 = .false.
+  end if
+!GILEE
+ 
   ! Thermal feedback from stars
 #if NDIM==3
                                call timer('feedback','start')
