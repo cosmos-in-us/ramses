@@ -60,6 +60,9 @@ subroutine smooth_density_field(ilevel)
     do i=1, active(ilevel)%ngrid
       igrid = active(ilevel)%igrid(i)
       icell = igrid + iskip
+      icell_father = father(icell)
+
+      rho_father(icell) = rho(icell_father)
 
       if(ilevel == level_u) then
         rho_gravity(icell) = (1.0d0 - w) * rho(icell) + w * rho_father(icell)
