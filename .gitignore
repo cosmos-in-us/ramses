@@ -2,9 +2,9 @@
 *.o
 *.i
 *.mod
-ramses1d
-ramses2d
-ramses3d
+ramses1d*
+ramses2d*
+ramses3d*
 .DS_Store
 amr2cylprof
 amr2map
@@ -22,6 +22,7 @@ histo
 part2cylprof
 Makefile.*
 doc/*_build
+bin/run
 __pycache__
 # gprof
 *.gcda
