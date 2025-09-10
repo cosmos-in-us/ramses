@@ -8,24 +8,24 @@ DEBUG = 0
 # Do we want to test coverage?
 GCOV = 0
 # Compiler flavor: GNU or INTEL
-COMPILER = GNU
+COMPILER = INTEL
 # Size of vector cache
 NVECTOR = 32
 # Number of dimensions
-NDIM = 1
+NDIM = 3
 # Float precision size
 NPRE = 8
 # hydro/mhd/rhd solver
 SOLVER = hydro
 # Patch
-PATCH =
+PATCH = ../patch/proj_amr
 # Use RT? 1=Yes, 0=No
 RT = 0
 # Use turbulence? 1=Yes, 0=No (requires fftw3)
 USE_TURB = 0
 # Use MPI? 1=Yes, 0=No
-MPI = 0
-MPIF90 = mpif90
+MPI = 1
+MPIF90 = mpiifort
 # Root name of executable
 EXEC = ramses
 # Number of additional energies
@@ -33,7 +33,7 @@ NENER = 0
 # Use Grackle cooling? 1=Yes, 0=No
 GRACKLE = 0
 # Number of metal species
-NMETALS = 0
+NMETALS = 1
 # Use ATON? 1=Yes, 0=No
 ATON = 0
 # Number of ions for RT
@@ -201,6 +201,7 @@ PMOBJ = init_part.o output_part.o rho_fine.o synchro_fine.o move_fine.o \
 POISSONOBJ = init_poisson.o phi_fine_cg.o interpol_phi.o force_fine.o \
              multigrid_fine_commons.o multigrid_fine_fine.o \
              multigrid_fine_coarse.o gravana.o boundary_potential.o rho_ana.o \
+						 smooth_density_field.o dump_density_fields.o \
              output_poisson.o
 # Hydro objects
 HYDROOBJ = init_hydro.o init_flow_fine.o write_screen.o output_hydro.o \
