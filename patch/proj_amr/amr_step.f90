@@ -215,6 +215,13 @@ recursive subroutine amr_step(ilevel,icount)
      call save_phi_old(ilevel)
                                call timer('rho','start')
      call rho_fine(ilevel,icount)
+
+!GILEE
+  if(smooth_gravity) then
+     call smooth_density_field(ilevel)
+  end if
+!GILEE
+
   endif
 
   !-------------------------------------------

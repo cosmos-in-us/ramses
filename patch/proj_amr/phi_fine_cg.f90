@@ -31,10 +31,18 @@ subroutine phi_fine_cg(ilevel,icount)
 #ifndef WITHOUTMPI
   real(kind=8) :: rhs_norm_all, pAp_all, r2_all
 #endif
+  real(dp), pointer, dimension(:) :: source_rho !GILEE
 
   if(gravity_type>0)return
   if(numbtot(1,ilevel)==0)return
   if(verbose)write(*,111)ilevel
+!GILEE
+  if(smooth_gravity)then
+    source_rho => rho_gravity
+  else
+    source_rho => rho
+  end if
+!GILEE
 
   ! Set constants
   dx2=(0.5D0**ilevel)**2
@@ -65,7 +73,7 @@ subroutine phi_fine_cg(ilevel,icount)
      iskip=ncoarse+(ind-1)*ngridmax
      do i=1,active(ilevel)%ngrid
         idx=active(ilevel)%igrid(i)+iskip
-        rhs_norm=rhs_norm+fact2*(rho(idx)-rho_tot)*(rho(idx)-rho_tot)
+        rhs_norm=rhs_norm+fact2*(source_rho(idx)-rho_tot)*(source_rho(idx)-rho_tot) !GILEE
      end do
   end do
   ! Compute global norms
@@ -221,6 +229,16 @@ subroutine cmp_residual_cg(ilevel,icount)
   real(dp),dimension(1:nvector,1:twotondim,1:ndim),save::phi_left,phi_right
   real(dp),dimension(1:nvector),save::residu
 
+!GILEE
+  real(dp), pointer, dimension(:) :: source_rho 
+
+  if(smooth_gravity) then
+     source_rho => rho_gravity
+  else
+    source_rho => rho
+  endif
+!GILEE
+
   ! Set constants
   dx2=(0.5D0**ilevel)**2
   nx_loc=icoarse_max-icoarse_min+1
@@ -299,7 +317,7 @@ subroutine cmp_residual_cg(ilevel,icount)
            end do
         end do
         do i=1,ngrid
-           residu(i)=residu(i)+fact*(rho(ind_cell(i))-rho_tot)
+           residu(i)=residu(i)+fact*(source_rho(ind_cell(i))-rho_tot) !GILEE
         end do
 
         ! Store results in f(i,1) and f(i,2)

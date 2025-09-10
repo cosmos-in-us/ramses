@@ -27,4 +27,9 @@ module poisson_parameters
   !   2 is slower but can give much better convergence in some cases
   integer, parameter :: ncycles_coarse_safe = 1
 
+!GILEE
+  logical :: smooth_gravity = .false.
+  real(dp) :: dr_smooth = 0.0D0
+!GILEE
+
 end module poisson_parameters

@@ -1080,6 +1080,17 @@ subroutine make_fine_bc_rhs(ilevel,icount)
    integer  :: nx_loc
    real(dp) :: scale, fourpi
 
+!GILEE
+   real(dp), pointer, dimension(:) :: source_rho
+
+   ! Select which density field to use as the source term
+   if(smooth_gravity) then
+     source_rho => rho_gravity
+   else
+     source_rho => rho
+   end if
+!GILEE
+
    ! Set constants
    nx_loc = icoarse_max-icoarse_min+1
    scale  = boxlen/dble(nx_loc)
@@ -1101,7 +1112,7 @@ subroutine make_fine_bc_rhs(ilevel,icount)
          icell_amr = iskip_amr + igrid_amr
 
          ! Init BC-modified RHS to rho - rho_tot :
-         f(icell_amr,2) = fourpi*(rho(icell_amr) - rho_tot)
+         f(icell_amr,2) = fourpi*(source_rho(icell_amr) - rho_tot) !GILEE
 
          if(f(icell_amr,3)<=0.0) cycle ! Do not process masked cells
 

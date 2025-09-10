@@ -32,6 +32,15 @@ subroutine init_poisson
      rho_top=0
   endif
 
+!GILEE
+  if(smooth_gravity)then
+     allocate(rho_gravity(1:ncell))
+     allocate(rho_father(1:ncell))
+     rho_gravity=0
+     rho_father=0
+  endif
+!GILEE
+
   !------------------------------------------------------
   ! Allocate multigrid variables
   !------------------------------------------------------
