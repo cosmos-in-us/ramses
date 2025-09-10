@@ -530,13 +530,15 @@ subroutine star_formation(ilevel)
               if(d<=d0)ok(i)=.false.
            end do
            ! Temperature criterion
-           do i=1,ngrid
-              T2=uold(ind_cell(i),5)*scale_T2*(gamma-1.0d0)
-              nH=max(uold(ind_cell(i),1),smallr)*scale_nH
-              T_poly=T2_star*(nH/nISM)**(g_star-1.0d0)
-              T2=T2-T_poly
-              if(T2>2d4)ok(i)=.false.
-           end do
+           if(jeans_ncells<0)then !GILEE
+              do i=1,ngrid
+                 T2=uold(ind_cell(i),5)*scale_T2*(gamma-1.0d0)
+                 nH=max(uold(ind_cell(i),1),smallr)*scale_nH
+                 T_poly=T2_star*(nH/nISM)**(g_star-1.0d0)
+                 T2=T2-T_poly
+                 if(T2>2d4)ok(i)=.false.
+              end do
+           end if !GILEE
         endif
         ! Geometrical criterion
         if(ivar_refine>0)then
