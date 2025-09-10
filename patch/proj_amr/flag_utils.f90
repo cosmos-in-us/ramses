@@ -363,7 +363,6 @@ subroutine userflag_fine(ilevel)
      endif
   endif
 !GILEE
-  endif
 
   if(prevent_refine)return
 
