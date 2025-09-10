@@ -277,6 +277,7 @@ subroutine read_params
      y_refine  (i)=y_refine  (i-levelmin+1)
      z_refine  (i)=z_refine  (i-levelmin+1)
      m_refine  (i)=m_refine  (i-levelmin+1)
+     m_refine_basic(i)=m_refine  (i-levelmin+1) !GILEE
      exp_refine(i)=exp_refine(i-levelmin+1)
      initfile  (i)=initfile  (i-levelmin+1)
   end do
@@ -290,6 +291,7 @@ subroutine read_params
      y_refine  (i)= 0
      z_refine  (i)= 0
      m_refine  (i)=-1
+     m_refine_basic(i)=-1 !GILEE
      exp_refine(i)= 2
      initfile  (i)= ' '
   end do
@@ -393,7 +395,8 @@ subroutine read_amr_params(namelist_unit,nml_ok)
 
    ! AMR grid parameters
    namelist/amr_params/levelmin,levelmax,ngridmax,ngridtot &
-   & ,npartmax,nparttot,nexpand,boxlen,nlevel_collapse
+   & ,npartmax,nparttot,nexpand,boxlen,nlevel_collapse &
+   & ,holdback,dr_refine_pkpc !GILEE
 
    ! Go to the beginning of the file
    rewind(namelist_unit)

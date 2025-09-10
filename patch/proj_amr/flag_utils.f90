@@ -301,6 +301,11 @@ subroutine userflag_fine(ilevel)
 
   logical::prevent_refine
 
+!GILEE
+  real(dp)::dr_min_ckpc
+  real(dp)::boxlen_ckpc,dx_ckpc
+!GILEE
+
   if(ilevel==nlevelmax)return
   if(numbtot(1,ilevel)==0)return
 
@@ -329,10 +334,35 @@ subroutine userflag_fine(ilevel)
   if(cosmo.and.cooling)then
      ! Finest cell size
      dx_min=(0.5D0**nlevelmax)*scale
-     ! Test is designed so that nlevelmax is activated at aexp=0.8
-     if(ilevel.gt.nlevelmax_part+nlevel_collapse)then
-        if(dx_loc<2d0*dx_min*(0.8/aexp)) prevent_refine=.true.
+!GILEE
+     if(holdback)then
+        ! Original holdback method
+        ! Test is designed so that nlevelmax is activated at aexp=0.8
+        if(ilevel.gt.nlevelmax_part+nlevel_collapse)then
+           if(dx_loc<2d0*dx_min*(0.8/aexp)) prevent_refine=.true.
+        endif
+     else
+        ! Sub-Lagrangian refinement based on target physical resolution (dr_min_kpc)
+        dr_min_ckpc=dr_refine_pkpc*0.8/aexp ! the factor is changible, 0.8 is arbitrary
+        boxlen_ckpc=boxlen_ini * 1.0d5 / h0
+        dx_ckpc=dx*boxlen_ckpc
+
+        m_refine(ilevel)=m_refine_basic(ilevel)*(2D0*dr_min_ckpc/min(dx_ckpc,2D0*dr_min_ckpc))**3D0
+
+        ! FOR DEBUGGING
+        if(myid==1)then
+          write(*,*) 'DEBUG GILEE:', &
+          '  aexp=', aexp, &
+          '  ilevel=', ilevel, &
+          '  boxlen_ckpc=', boxlen_ckpc, &
+          '  dr_min_ckpc=', dr_min_ckpc, &
+          '  dx_ckpc=', dx_ckpc, &
+          '  m_refine=', m_refine(ilevel)
+        endif
+
      endif
+  endif
+!GILEE
   endif
 
   if(prevent_refine)return

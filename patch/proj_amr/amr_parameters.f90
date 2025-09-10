@@ -341,6 +341,12 @@ module amr_parameters
   logical::print_when_io=.false.   ! If true print when IO
   logical::synchro_when_io=.false. ! If true synchronize when IO
 
+!GILEE
+  ! holdback / sub-Lagrangian
+  logical::holdback=.true.         ! Enable holdback method (only cosmo=.true.)
+  real(dp)::dr_refine_pkpc=1.0D0   ! Target resolution matching with current highest level cell size
+  real(dp),dimension(1:MAXLEVEL)::m_refine_basic=-1 ! Lagrangian threshold default
+!GILEE
 
 
 end module amr_parameters
