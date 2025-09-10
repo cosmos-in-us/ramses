@@ -6,18 +6,18 @@ subroutine dump_density_fields(current_step)
 
   integer, intent(in) :: current_step
   integer :: unit, i, l, ind, igrid, iskip
-  integer :: icell, icell_father
+  integer :: icell, icell_father, igrid_son
   integer :: level_d, level_u
   real(dp):: w_val, dx_l, dx_level_u
 
   character(len=80) :: filename
-  character(len=200) :: fmt_out
+!  character(len=200) :: fmt_out
 
-  fmt_out = "(3(es24.16e3, 1x), 5(i15, 1x), 5(es24.16e3, 1x))"
+!  fmt_out = "(3(es24.16e3, 1x), 6(i15, 1x), 5(es24.16e3, 1x))"
 
   write(filename, '(A,I0.5,A,I0.5,A)') 'debug_density_', current_step, '_', myid, '.txt'
-  open(newunit=unit, file=trim(filename), status='replace')
-  write(unit, '(A)') '# xg, yg, zg, igrid, iskip, icell_father, level, level_u, dx_level_u, w, rho, rho_father, rho_gravity'
+  open(newunit=unit, file=trim(filename), status='replace', recl=1024)
+  write(unit, '(A)') '# xg, yg, zg, igrid, iskip, icell_father, igrid_son, level, level_u, dx_level_u, w, rho, rho_father, rho_gravity'
 
   ! Find bracketing levels Ld and Lu
   level_d = 0
@@ -45,9 +45,10 @@ subroutine dump_density_fields(current_step)
           igrid = active(l)%igrid(i)
           icell = igrid + iskip
           icell_father = father(icell)
+          igrid_son = son(icell)
           
-          write(unit, fmt_out) xg(igrid, 1), xg(igrid, 2), xg(igrid, 3), &
-                               igrid, iskip, icell_father, &
+          write(unit, *) xg(igrid, 1), xg(igrid, 2), xg(igrid, 3), &
+                               igrid, iskip, icell_father, igrid_son, &
                                l, level_u, dx_level_u, w_val, &
                                rho(icell), rho_father(icell), rho_gravity(icell)
         end do
