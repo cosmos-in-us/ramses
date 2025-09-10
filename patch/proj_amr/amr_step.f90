@@ -357,6 +357,16 @@ recursive subroutine amr_step(ilevel,icount)
 #endif
   end if
 
+!GILEE
+  if(ilevel==levelmin)then
+    if(smooth_gravity)then
+      if(aexp>=aout(iout).or.aexp>=aout_next)then
+        call dump_density_fields(nstep_coarse)
+      end if
+    end if
+  end if
+!GILEE
+
   ! Thermal feedback from stars
 #if NDIM==3
                                call timer('feedback','start')
