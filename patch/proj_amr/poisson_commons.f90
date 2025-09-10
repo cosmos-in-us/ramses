@@ -3,10 +3,15 @@ module poisson_commons
   use poisson_parameters
 
   real(dp),allocatable,dimension(:)  ::phi,phi_old       ! Potential
-  real(dp),allocatable,dimension(:)  ::rho               ! Density
   real(dp),allocatable,dimension(:,:)::f                 ! 3-force
 
   real(dp),allocatable,dimension(:)  ::rho_top   ! Density at last CIC level
+
+!GILEE
+  real(dp),allocatable,target,dimension(:)  ::rho               ! Density
+  real(dp),allocatable,target,dimension(:)  ::rho_gravity   ! Density ONLY for the smoothed gravity source term 
+  real(dp),allocatable,target,dimension(:)  ::rho_father        ! Density of father cell
+!GILEE
 
   ! Multigrid lookup table for amr -> mg index mapping
   integer, allocatable, dimension(:) :: lookup_mg   ! Lookup table
