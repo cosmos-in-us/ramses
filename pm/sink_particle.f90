@@ -350,13 +350,13 @@ if (cloud_pts_check) then
                           if (rr<=rmass)then
                              ! check if direct_force is turned on
                              if(mass_sink_direct_force .ge. 0.0)then
-                                if(msink(isink)<mass_sink_direct_force*M_sun/(scale_d*scale_l**ndim))then
-                                   mp(indp)=msink(isink)/dble(ncloud_sink_massive)
+                                if((msink(isink)+msmbh(isink))<mass_sink_direct_force*M_sun/(scale_d*scale_l**ndim))then
+                                   mp(indp)=(msink(isink)+msmbh(isink))/dble(ncloud_sink_massive)
                                 else
                                    mp(indp)=0
                                 endif
                              else
-                                mp(indp)=msink(isink)/dble(ncloud_sink_massive)
+                                mp(indp)=(msink(isink)+msmbh(isink))/dble(ncloud_sink_massive)
                              endif
                           else
                              mp(indp)        = 0
@@ -401,13 +401,13 @@ else !perform the code the traditional way
                     if (rr<=rmass)then
                        ! check if direct_force is turned on
                        if(mass_sink_direct_force .ge. 0.0)then
-                          if(msink(isink)<mass_sink_direct_force*M_sun/(scale_d*scale_l**ndim))then
-                             mp(indp)=msink(isink)/dble(ncloud_sink_massive)
+                          if((msink(isink)+msmbh(isink))<mass_sink_direct_force*M_sun/(scale_d*scale_l**ndim))then
+                             mp(indp)=(msink(isink)+msmbh(isink))/dble(ncloud_sink_massive)
                           else
                              mp(indp)=0
                           endif
                        else
-                          mp(indp)=msink(isink)/dble(ncloud_sink_massive)
+                          mp(indp)=(msink(isink)+msmbh(isink))/dble(ncloud_sink_massive)
                        endif
                     else
                        mp(indp)        = 0
@@ -426,7 +426,7 @@ end if
   sink_jump(1:nsink,1:ndim,levelmin:nlevelmax)=0d0
   if(mass_sink_direct_force .ge. 0.0)then
      do isink=1,nsink
-        direct_force_sink(isink)=(msink(isink) .ge. mass_sink_direct_force*M_sun/(scale_d*scale_l**ndim))
+        direct_force_sink(isink)=((msink(isink)+msmbh(isink)) .ge. mass_sink_direct_force*M_sun/(scale_d*scale_l**ndim))
      end do
   else
      do isink=1,nsink
@@ -1967,7 +1967,7 @@ subroutine update_sink(ilevel)
   if(cosmo)factG=3d0/4d0/twopi*omega_m*aexp
 
   ! Set overlap mass to sink mass
-  msum_overlap=msink
+  msum_overlap=msink+msmbh
 
   ! Check for overlapping sinks
   do isink=1,nsink-1
@@ -1986,16 +1986,17 @@ subroutine update_sink(ilevel)
            overlap=rr<4*rmax2 .and. msink(jsink)>0.
 
            if(overlap)then
-              msum_overlap(isink)=msum_overlap(isink)+msink(jsink)
-              msum_overlap(jsink)=msum_overlap(jsink)+msink(isink)
+              msum_overlap(isink)=msum_overlap(isink)+msink(jsink)+msmbh(jsink)
+              msum_overlap(jsink)=msum_overlap(jsink)+msink(isink)+msmbh(isink)
 
               ! Merging based on relative distance
               merge_flag=rr<4*dx_min**2 ! Sinks are within two cells from each other
 
               ! Merging based on relative velocity
-              if(mass_merger_vel_check>0 .and. (msink(isink)+msink(jsink)).ge.mass_merger_vel_check*M_sun/(scale_d*scale_l**ndim)) then
+              if(mass_merger_vel_check>0 .and. &
+                 (msink(isink)+msmbh(isink)+msink(jsink)+msmbh(jsink)).ge.mass_merger_vel_check*M_sun/(scale_d*scale_l**ndim)) then
                  v1_v2=(vsink(isink,1)-vsink(jsink,1))**2+(vsink(isink,2)-vsink(jsink,2))**2+(vsink(isink,3)-vsink(jsink,3))**2
-                 merge_flag=merge_flag .and. 2*factG*(msink(isink)+msink(jsink))/sqrt(rr)>v1_v2
+                 merge_flag=merge_flag .and. 2*factG*(msink(isink)+msmbh(isink)+msink(jsink)+msmbh(jsink))/sqrt(rr)>v1_v2
               end if
 
               ! Merging based on sink age
@@ -2021,11 +2022,11 @@ subroutine update_sink(ilevel)
 
                  ! Set new values of remaining sink (keep one with larger index)
                  ! Compute centre of mass quantities
-                 mcom     =(msink(isink)+msink(jsink))
-                 xcom(1:ndim)=xsink(isink,1:ndim)+msink(jsink)*r_rel(1:ndim)/mcom
-                 vcom(1:ndim)=(msink(isink)*vsink(isink,1:ndim)+msink(jsink)*vsink(jsink,1:ndim))/mcom
-                 lcom(1:ndim)=msink(isink)*cross((xsink(isink,1:ndim)-xcom(1:ndim)),vsink(isink,1:ndim)-vcom(1:ndim))+ &
-                      &    msink(jsink)*cross((xsink(jsink,1:ndim)-xcom(1:ndim)),vsink(jsink,1:ndim)-vcom(1:ndim))
+                 mcom     =(msink(isink)+msmbh(isink))+(msink(jsink)+msmbh(jsink))
+                 xcom(1:ndim)=xsink(isink,1:ndim)+(msink(jsink)+msmbh(jsink))*r_rel(1:ndim)/mcom
+                 vcom(1:ndim)=((msink(isink)+msmbh(isink))*vsink(isink,1:ndim)+(msink(jsink)+msmbh(jsink))*vsink(jsink,1:ndim))/mcom
+                 lcom(1:ndim)=(msink(isink)+msmbh(isink))*cross((xsink(isink,1:ndim)-xcom(1:ndim)),vsink(isink,1:ndim)-vcom(1:ndim))+ &
+                      &    (msink(jsink)+msmbh(jsink))*cross((xsink(jsink,1:ndim)-xcom(1:ndim)),vsink(jsink,1:ndim)-vcom(1:ndim))
 
                  ! Reset jump in old sink coordinates
                  do lev=levelmin,nlevelmax
@@ -2033,7 +2034,7 @@ subroutine update_sink(ilevel)
                  end do
 
                  ! Compute merged quantities
-                 msink(isink)        = mcom
+                 msink(isink)        = msink(isink)+msink(jsink)
                  msmbh(isink)        = msmbh(isink)+msmbh(jsink)
                  dmfsink(isink)      = dmfsink(isink)+dmfsink(jsink)
                  delta_mass(isink)   = delta_mass(isink)+delta_mass(jsink)
@@ -2263,7 +2264,7 @@ subroutine upd_cloud(ind_part,np)
   do j=1,np
      if ( is_cloud(typep(ind_part(j))) .and. mp(ind_part(j))>0.0d0 ) then
         isink = -idp(ind_part(j))
-        mp(ind_part(j)) = msink(isink)/dble(ncloud_sink_massive)
+        mp(ind_part(j)) = (msink(isink)+msmbh(isink))/dble(ncloud_sink_massive)
      end if
   end do
 
@@ -2533,7 +2534,7 @@ subroutine f_gas_sink(ilevel)
 
               ! Add gas acceleration due to sink
               do i=1,ngrid
-                 f(ind_cell(i),1:ndim)=f(ind_cell(i),1:ndim)+factG*msink(isink)*ff(i,1:ndim)
+                 f(ind_cell(i),1:ndim)=f(ind_cell(i),1:ndim)+factG*(msink(isink)+msmbh(isink))*ff(i,1:ndim)
               end do
 
               ! Add sink acceleration due to gas
@@ -2547,7 +2548,7 @@ subroutine f_gas_sink(ilevel)
 
         d_min=d_min**0.5d0
         d_min=max(ssoft,d_min)
-        rho_tff=max(rho_tff,max(msink(isink),msum_overlap(isink))/(4d0/3d0*pi*d_min**ndim))
+        rho_tff=max(rho_tff,max(msink(isink)+msmbh(isink),msum_overlap(isink))/(4d0/3d0*pi*d_min**ndim))
 
      end if !end if direct force
   end do !end loop over sinks
@@ -2642,7 +2643,7 @@ subroutine f_sink_sink
            ! Compute acceleration
            do jsink=1,nsink
               if (direct_force_sink(jsink))then
-                 ff(jsink,1:ndim)=factG*msink(jsink)/(ssoft**2+d2(jsink))**1.5d0*ff(jsink,1:ndim)
+                 ff(jsink,1:ndim)=factG*(msink(jsink)+msmbh(jsink))/(ssoft**2+d2(jsink))**1.5d0*ff(jsink,1:ndim)
               end if
            end do
            do jsink=1,nsink
