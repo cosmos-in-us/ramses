@@ -2012,11 +2012,13 @@ subroutine update_sink(ilevel)
                     write(*,*)'> Merging sink ',idsink(jsink),' into sink ',idsink(isink)
                     if(verbose_AGN)then
                        write(*,*)'>> Sink #1: ',idsink(isink)
-                       write(*,*)msink(isink)/M_sun*(scale_d*scale_l**ndim)
-                       write(*,*)xsink(isink,1:ndim)
+                       write(*,*)'msink = ', msink(isink)/M_sun*(scale_d*scale_l**ndim)
+                       write(*,*)'msmbh = ', msmbh(isink)/M_sun*(scale_d*scale_l**ndim)
+                       write(*,*)'xsink = ', xsink(isink,1:ndim)
                        write(*,*)'>> Sink #2: ',idsink(jsink)
-                       write(*,*)msink(jsink)/M_sun*(scale_d*scale_l**ndim)
-                       write(*,*)xsink(jsink,1:ndim)
+                       write(*,*)'msink = ', msink(jsink)/M_sun*(scale_d*scale_l**ndim)
+                       write(*,*)'msmbh = ', msmbh(jsink)/M_sun*(scale_d*scale_l**ndim)
+                       write(*,*)'xsink = ', xsink(jsink,1:ndim)
                     endif
                  endif
 
