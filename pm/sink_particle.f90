@@ -1262,7 +1262,7 @@ subroutine compute_accretion_rate(write_sinks)
      endif
 
      ! Bondi radius
-     r2(isink)=(factG*msink(isink)/v_bondi**2)**2
+     r2(isink)=(factG*(msink(isink)+msmbh(isink))/v_bondi**2)**2
 
      ! Extrapolate to rho_inf
      rho_inf(isink)=density/(bondi_alpha(ir_cloud*0.5d0*dx_min/(r2(isink)+tiny(0.0_dp))**0.5d0))
@@ -1271,7 +1271,7 @@ subroutine compute_accretion_rate(write_sinks)
      dMBHoverdt(isink)=4*pi*rho_inf(isink)*r2(isink)*v_bondi
 
      ! Compute Eddington accretion rate in code units
-     dMEDoverdt(isink)=4*pi*factG_in_cgs*msink(isink)*mH/(0.1d0*sigma_T*c_cgs)*scale_t
+     dMEDoverdt(isink)=4*pi*factG_in_cgs*(msink(isink)+msmbh(isink))*mH/(0.1d0*sigma_T*c_cgs)*scale_t
 
      ! Compute final sink accretion rate
      if(bondi_accretion)dMsink_overdt(isink)=dMBHoverdt(isink)
@@ -1283,8 +1283,8 @@ subroutine compute_accretion_rate(write_sinks)
         dMBHoverdt_smbh(isink)=4*pi*rho_inf_smbh*r2_smbh*v_bondi
         dMEDoverdt_smbh(isink)=4*pi*factG_in_cgs*msmbh(isink)*mH/(0.1d0*sigma_T*c_cgs)*scale_t
         if(bondi_accretion)dMsmbh_overdt(isink)=dMBHoverdt_smbh(isink)
-        if(eddington_limit)dMsmbh_overdt(isink)=min(dMBHoverdt(isink),dMEDoverdt_smbh(isink))
-        dMsink_overdt(isink)=max(0d0,dMBHoverdt(isink)-dMsmbh_overdt(isink))
+        if(eddington_limit)dMsmbh_overdt(isink)=min(dMBHoverdt_smbh(isink),eddington_cap*dMEDoverdt_smbh(isink))
+        dMsink_overdt(isink)=max(0d0,dMsink_overdt(isink)-dMsmbh_overdt(isink))
      end if
 
      ! Store average quantities for diagnostics
@@ -1293,7 +1293,7 @@ subroutine compute_accretion_rate(write_sinks)
      volume_gas(isink)=volume
      vel_gas(isink,1:ndim)=velocity(1:ndim)
 
-     if (agn.and.dMsink_overdt(isink)>0.0)then
+     if (agn.and.(dMsink_overdt(isink)+dMsmbh_overdt(isink))>0.0)then
         ! Check whether we should have AGN feedback
         if(T2_min<=0.0)then ! If zero or less, we always deposit feedback
            ok_blast_agn(isink)=.true.
@@ -1301,7 +1301,7 @@ subroutine compute_accretion_rate(write_sinks)
            ok_blast_agn(isink)=.false.
            T2_gas=ethermal*scale_T2 ! in Kelvin
            delta_mass_min = mgas*(T2_min-T2_gas)/(T2_AGN-T2_min)
-           if((T2_gas.ge.T2_min).or.(delta_mass(isink).ge.mgas*(T2_min-T2_gas)/(T2_AGN-T2_min)))then
+           if((T2_gas.ge.T2_min).or.(delta_mass(isink).ge.delta_mass_min))then
               ok_blast_agn(isink)=.true.
            end if
         end if
